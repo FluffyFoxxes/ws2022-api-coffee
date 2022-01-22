@@ -132,43 +132,4 @@ class ChangeController extends Controller
             );
         }
     }
-
-    public function showOrders(Request $request, $code)
-    {
-        $bearer = $request->header('authorization');
-        if ($bearer != "") {
-            $token = explode(" ", $bearer)[1];
-            $user = User::all()->where('token', $token)->first();
-            if ($user != null) {
-                if ($user->group == "Администраторы") {
-                    $change = Change::all()->where("code", $code)->first();
-                    if ($change != null) {
-                        return response()->json(
-                            ["data" => "not implemented!!!"]
-                        );
-                    } else {
-                        return response()->json(
-                            ["code" => 403, "message" => "Change not found."],
-                            403
-                        );
-                    }
-                } else {
-                    return response()->json(
-                        ["code" => 403, "message" => "Forbidden for you"],
-                        403
-                    );
-                }
-            } else {
-                return response()->json(
-                    ["code" => 403, "message" => "Login failed"],
-                    403
-                );
-            }
-        } else {
-            return response()->json(
-                ["code" => 403, "message" => "Login failed"],
-                403
-            );
-        }
-    }
 }
