@@ -72,31 +72,98 @@ class UserController extends Controller
         }
     }
 
-    public function create(Request $request)
+    public function showUsers(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            "name" => "required|string",
-            "login" => "required|string",
-            "status" => "required|string",
-            "group" => "required|string"
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "error" => [
-                    "code" => 422,
-                    "message" => "Validation error",
-                    "errors" => $validator->errors()
-                ],
-            ], 422);
+        $bearer = $request->header('authorization');
+        if ($bearer != "") {
+            $token = explode(" ", $bearer)[1];
+            $user = User::all()->where('token', $token)->first();
+            if ($user != null) {
+                if ($user->group == "Администраторы") {
+                    return response()->json(
+                        ["data" => User::all()]
+                    );
+                } else {
+                    return response()->json(
+                        ["code" => 403, "message" => "Forbidden for you"],
+                        403
+                    );
+                }
+            } else {
+                return response()->json(
+                    ["code" => 403, "message" => "Login failed"],
+                    403
+                );
+            }
+        } else {
+            return response()->json(
+                ["code" => 403, "message" => "Login failed"],
+                403
+            );
         }
+    }
 
-        $password = bin2hex(openssl_random_pseudo_bytes(16));
+    public function createUser(Request $request)
+    {
+        $bearer = $request->header('authorization');
+        if ($bearer != "") {
+            $token = explode(" ", $bearer)[1];
+            $user = User::all()->where('token', $token)->first();
+            if ($user != null) {
+                if ($user->group == "Администраторы") {
+                    $validator = Validator::make($request->all(), [
+                        "name" => "required|string",
+                        "login" => "required|string",
+                        "status" => "required|string",
+                        "group" => "required|string"
+                    ]);
 
-        return response()->json([
-            "data" => [
-                "code" => $password
-            ]
-        ]);
+                    if ($validator->fails()) {
+                        return response()->json([
+                            "error" => [
+                                "code" => 422,
+                                "message" => "Validation error",
+                                "errors" => $validator->errors()
+                            ],
+                        ], 422);
+                    }
+
+
+
+                    $password = bin2hex(openssl_random_pseudo_bytes(16));
+
+                    $people = new User([
+                        "name" => $request->get("name"),
+                        "login" => $request->get("login"),
+                        "status" => $request->get("status"),
+                        "group" => $request->get("group"),
+                        "password" => $password,
+                    ]);
+
+                    $people->save();
+
+                    return response()->json([
+                        "data" => [
+                            "code" => $password
+                        ]
+                    ]);
+                } else {
+                    return response()->json(
+                        ["code" => 403, "message" => "Forbidden for you"],
+                        403
+                    );
+                }
+            } else {
+                return response()->json(
+                    ["code" => 403, "message" => "Login failed"],
+                    403
+                );
+            }
+        } else {
+            return response()->json(
+                ["code" => 403, "message" => "Login failed"],
+                403
+            );
+        }
     }
 }
