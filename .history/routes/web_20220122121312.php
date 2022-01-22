@@ -18,7 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('api-cafe')->group(function () {
+Route::prefix('api-cafe')->group(function () use (Route::post('users/{id}', function ($id) {
+
+});) {
     Route::post('login', [UserController::class, 'login']);
-    Route::post('users', [UserController::class, 'create']);
 });

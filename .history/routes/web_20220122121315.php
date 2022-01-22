@@ -20,5 +20,4 @@ Route::get('/', function () {
 
 Route::prefix('api-cafe')->group(function () {
     Route::post('login', [UserController::class, 'login']);
-    Route::post('users', [UserController::class, 'create']);
 });
