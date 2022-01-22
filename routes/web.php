@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\ChangeController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,5 +24,21 @@ Route::get('/', function () {
 
 Route::prefix('api-cafe')->group(function () {
     Route::post('login', [UserController::class, 'login']);
-    Route::post('users', [UserController::class, 'create']);
+    Route::get('logout', [UserController::class, 'logout']);
+
+    Route::get('users', [UserController::class, 'showUsers']);
+    Route::post('users', [UserController::class, 'createUser']);
+    Route::prefix('change')->group(function () {
+        Route::post('/', [ChangeController::class, 'createChange']);
+        Route::post('user', [ChangeController::class, 'addUser']);
+        Route::get('{code}/orders', [OrderController::class, 'showOrders']);
+    });
+
+    Route::prefix('orders')->group(function () {
+        Route::post('book', [OrderController::class, 'createOrder']);
+        Route::post('{code}', [OrderController::class, 'showOrder']);
+        Route::post('book/{code}', [OrderController::class, 'changeStatus']);
+        Route::post('{code}/dish', [OrderController::class, 'addDish']);
+        Route::delete('{code}/dish', [OrderController::class, 'deleteDish']);
+    });
 });
