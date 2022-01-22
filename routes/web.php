@@ -37,7 +37,7 @@ Route::prefix('api-cafe')->group(function () {
     Route::prefix('orders')->group(function () {
         Route::post('book', [OrderController::class, 'createOrder']);
         Route::post('{code}', [OrderController::class, 'showOrder']);
-        Route::post('book/{code}', [OrderController::class, 'changeStatus']);
+        Route::put('book/{code}', [OrderController::class, 'changeStatus']);
         Route::post('{code}/dish', [OrderController::class, 'addDish']);
         Route::delete('{code}/dish', [OrderController::class, 'deleteDish']);
     });

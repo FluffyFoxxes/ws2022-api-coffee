@@ -90,10 +90,6 @@ class OrderController extends Controller
 
     public function showOrder(Request $request, $code)
     {
-    }
-
-    public function showOrders(Request $request, $code)
-    {
         $bearer = $request->header('authorization');
         if ($bearer != "") {
             $token = explode(" ", $bearer)[1];
@@ -131,8 +127,108 @@ class OrderController extends Controller
         }
     }
 
+    public function showOrders(Request $request, $code)
+    {
+        $bearer = $request->header('authorization');
+        if ($bearer != "") {
+            $token = explode(" ", $bearer)[1];
+            $user = User::all()->where('token', $token)->first();
+            if ($user != null) {
+                if ($user->group == "Официант" || $user->group == "Повар") {
+                    $change = Change::all()->where("code", $code)->first();
+                    $order = Order::all()->where("id", 1)->first();
+                    $dishs = Dish::all();
+                    if ($change != null) {
+                        return response()->json(
+                            ["data" => [
+                                "change_orders" => [
+                                    "change_id" => $change->id,
+                                    "orders" => [
+                                        "id" => $order->id,
+                                        "table" => $order->book_id,
+                                        "dishs" => $dishs,
+                                    ],
+                                ],
+                            ]]
+                        );
+                    } else {
+                        return response()->json(
+                            ["code" => 403, "message" => "Change not found."],
+                            403
+                        );
+                    }
+                } else {
+                    return response()->json(
+                        ["code" => 403, "message" => "Forbidden for you"],
+                        403
+                    );
+                }
+            } else {
+                return response()->json(
+                    ["code" => 403, "message" => "Login failed"],
+                    403
+                );
+            }
+        } else {
+            return response()->json(
+                ["code" => 403, "message" => "Login failed"],
+                403
+            );
+        }
+    }
+
     public function changeStatus(Request $request, $code)
     {
+        $bearer = $request->header('authorization');
+        if ($bearer != "") {
+            $token = explode(" ", $bearer)[1];
+            $user = User::all()->where('token', $token)->first();
+            if ($user != null) {
+                if ($user->group == "Официант" || $user->group == "Повар") {
+                    $validator = Validator::make($request->all(), [
+                        "status" => "required|string"
+                    ]);
+
+                    if ($validator->fails()) {
+                        return response()->json([
+                            "error" => [
+                                "code" => 422,
+                                "message" => "Validation error",
+                                "errors" => $validator->errors()
+                            ],
+                        ], 422);
+                    }
+                    $order = Order::all()->where("code", $code)->first();
+                    if ($order != null) {
+                        $order->status = $request->get("status");
+                        $order->save();
+                        return response()->json(
+                            ["data" => ["code" => $order->code]]
+                        );
+                    } else {
+                        return response()->json(
+                            ["code" => 403, "message" => "Order not found."],
+                            403
+                        );
+                    }
+                } else {
+                    return response()->json(
+                        ["code" => 403, "message" => "Forbidden for you"],
+                        403
+                    );
+                }
+            } else {
+                return response()->json(
+                    ["code" => 403, "message" => "Login failed"],
+                    403
+                );
+            }
+        } else {
+            return response()->json(
+                ["code" => 403, "message" => "Login failed"],
+                403
+            );
+        }
     }
 
     public function addDish(Request $request, $code)
@@ -200,5 +296,40 @@ class OrderController extends Controller
 
     public function deleteDish(Request $request, $code)
     {
+        $bearer = $request->header('authorization');
+        if ($bearer != "") {
+            $token = explode(" ", $bearer)[1];
+            $user = User::all()->where('token', $token)->first();
+            if ($user != null) {
+                if ($user->group == "Официант") {
+                    $order = Order::all()->where("code", $code)->first();
+                    if ($order != null) {
+                        return response()->json(
+                            ["data" => ["code" => $order->code]]
+                        );
+                    } else {
+                        return response()->json(
+                            ["code" => 403, "message" => "Order not found."],
+                            403
+                        );
+                    }
+                } else {
+                    return response()->json(
+                        ["code" => 403, "message" => "Forbidden for you"],
+                        403
+                    );
+                }
+            } else {
+                return response()->json(
+                    ["code" => 403, "message" => "Login failed"],
+                    403
+                );
+            }
+        } else {
+            return response()->json(
+                ["code" => 403, "message" => "Login failed"],
+                403
+            );
+        }
     }
 }
