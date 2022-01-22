@@ -17,6 +17,7 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->foreignId("book_id")->constrained("books");
             $table->string("status");
+            $table->string("code");
             $table->timestamps();
         });
     }

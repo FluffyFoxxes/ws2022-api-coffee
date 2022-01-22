@@ -26,12 +26,12 @@ Route::prefix('api-cafe')->group(function () {
     Route::post('login', [UserController::class, 'login']);
     Route::get('logout', [UserController::class, 'logout']);
 
-    Route::get('users', [UserController::class, 'showUsers']);
-    Route::post('users', [UserController::class, 'createUser']);
+    Route::get('users', [UserController::class, 'showUsers']); // функционал админа
+    Route::post('users', [UserController::class, 'createUser']); // функционал админа
     Route::prefix('change')->group(function () {
-        Route::post('/', [ChangeController::class, 'createChange']);
-        Route::post('user', [ChangeController::class, 'addUser']);
-        Route::get('{code}/orders', [OrderController::class, 'showOrders']);
+        Route::post('/', [ChangeController::class, 'createChange']); // функционал админа
+        Route::post('user', [ChangeController::class, 'addUser']); // функционал админа
+        Route::get('{code}/orders', [OrderController::class, 'showOrders']); // функционал админа
     });
 
     Route::prefix('orders')->group(function () {
